@@ -7,12 +7,18 @@ import sys
 # set this to True to prevent any file writes (except backups)
 TEST_MODE = False
 
+# a few errors should be non-terminal, change this to make them terminal
+QUIT_ON_ERRORS = False
+
 UNATTENDED = False
 HTTPD_CONF_PATH = '/etc/apache2/httpd.conf'
 BACKBURNER_UTILS_PATH = '/usr/discreet'
 BACKUP_DIR      = os.path.expanduser('~/Desktop/Backburner Uninstall Backups/')
 LAUNCHDAEMON_PATH = '/Library/LaunchDaemons/'
 LAUNCHDAEMON_LIST = ['com.autodesk.backburner_manager.plist', 'com.autodesk.backburner_server.plist', 'com.autodesk.backburner_start.plist']
+WEBSERVER_PATH     = '/Library/WebServer/Documents/'
+WEBSERVER_LIST    = ['adsk_web_entry', 'Backburner', 'index.php']
+
 
 apacheText = '''
 #
@@ -143,7 +149,7 @@ def fix_apache():
     lines = ''.join(f.readlines())
     f.close()
     idx = lines.find(apacheText)
-    if idx == -1:
+    if idx == -1 and QUIT_ON_ERRORS:
         raise UninstallerException("Can't find Backburner's data in the Apache config (%s)" % (HTTPD_CONF_PATH) )
     fixed = lines[:idx] + lines[idx+len(apacheText):]
 
@@ -181,7 +187,22 @@ def ask_attendance():
     if UNATTENDED:
         modeText = "UNATTENDED"
     print "\n(Running in %s mode)\n" % (modeText)
-    
+
+def remove_web_files():
+    """ Cleans out the apache web directory and attempts to restore backups
+    """
+    print "removing Backburner files from web server..."
+    for webFile in WEBSERVER_LIST:
+        backup(WEBSERVER_PATH + webFile)
+        deleteWithConfirmation(WEBSERVER_PATH + webFile)
+
+    fixFiles = os.listdir(WEBSERVER_PATH)
+    for tofix in fixFiles:
+        if tofix.startswith('index') and tofix.endswith('.backup'):
+            newName = tofix[:tofix.find('.backup')]
+            print "  restoring %s to %s" % (tofix, newName)
+            if not TEST_MODE:
+                os.rename(WEBSERVER_PATH + tofix, WEBSERVER_PATH + newName)
 
 def main():
     try:
@@ -192,6 +213,7 @@ def main():
         fix_apache()
         remove_backburner_server()
         remove_launchDaemons()
+        remove_web_files()
         start_apache()
     except Exception, err:
         print err.args

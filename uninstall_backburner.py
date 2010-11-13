@@ -144,6 +144,16 @@ def confirm_sudo():
 def fix_apache():
     print "fixing Apache config file..."
     backup(HTTPD_CONF_PATH);
+
+    deleteWithConfirmation(HTTPD_CONF_PATH);
+    shutil.copy2(HTTPD_CONF_PATH + ".bak", HTTPD_CONF_PATH)
+    
+    """
+    # removed: repeat runs fuck it up bigtime (presumably when the string
+    # isn't found)
+    # thankfully there's a backup taken by the installer (unless I did that
+    # some other time ;p)
+    
     f = open(HTTPD_CONF_PATH, 'r')
 
     lines = ''.join(f.readlines())
@@ -159,6 +169,8 @@ def fix_apache():
         f.writelines(fixed)
         
     f.close()
+
+    """
     print "  done."
 
 def remove_backburner_server():

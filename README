@@ -1,0 +1,10 @@
+---- Autodesk Backburner Uninstall for Mac OS X ----
+
+Autodesk Backburner has no working uninstaller and there is minimal information online about what to do in Mac OS X to remove everything cleanly.  
+
+This is a very simple program, and should almost certainly be a shell script instead.  
+
+Only tested with Macbook Pro, Snow Leopard and Backburner 2011 student edition - but I've basically replicated the (overly complex) uninstall instructions provided by an article I read (link coming soon, I've just reset my bookmarks).
+
+How do I uninstall Autodesk Backburner from my Mac OS X machine?
+   * run the program </obvious sentence keywording for googlers>
